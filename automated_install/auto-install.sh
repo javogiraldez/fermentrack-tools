@@ -19,8 +19,8 @@
 # SOFTWARE.
 
 package_name="Fermentrack"
-install_curl_url="install.fermentrack.com"
-install_curl_command="curl -L install.fermentrack.com | sudo bash"
+install_curl_url="goo.gl/1ccpUR"
+install_curl_command="curl -L goo.gl/1ccpUR | sudo bash"
 tools_name="fermentrack-tools"
 tools_repo_url="https://github.com/javogiraldez/fermentrack-tools.git"
 
