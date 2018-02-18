@@ -25,7 +25,7 @@ package_name="Fermentrack"
 install_curl_url="install-legacy-support.fermentrack.com"
 install_curl_command="curl -L install-legacy-support.fermentrack.com | sudo bash"
 tools_name="fermentrack-tools"
-tools_repo_url="https://github.com/thorrak/fermentrack-tools.git"
+tools_repo_url="https://github.com/javogiraldez/fermentrack-tools.git"
 
 # Set scriptPath to the current script path
 unset CDPATH
