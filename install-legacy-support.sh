@@ -37,7 +37,7 @@
 
 
 package_name="Fermentrack"
-github_repo="https://github.com/thorrak/fermentrack.git"
+github_repo="https://github.com/javogiraldez/fermentrack.git"
 github_branch="master"
 green=$(tput setaf 76)
 red=$(tput setaf 1)
