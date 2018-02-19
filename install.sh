@@ -127,9 +127,9 @@ warn() {
   echo "${red}*** ERROR ERROR ERROR ERROR ERROR ***${reset}"
   echo -e "${red}$fmt\n" "${@}${reset}"
   echo "${red}*** ----------------------------------${reset}"
-  echo "${red}*** See above lines for error message${reset}"
-  echo "${red}*** Setup NOT completed${reset}"
-  echo "${red}*** More information in the \"install.log\" file${reset}"
+  echo "${red}*** Mira las lineas superiores para sabes del error${reset}"
+  echo "${red}*** Configuración NO completada${reset}"
+  echo "${red}*** Más info en el archivo \"install.log\"${reset}"
 }
 
 
@@ -150,20 +150,20 @@ welcomeMessage() {
 
 EOF
   echo -n "${reset}"
-  echo "Welcome to the installation of Fermentrack. This script will install fermentrack."
-  echo "A new user will be created and Fermentrack will be installed in that users home directory."
-  echo "When the installation is done with no errors Fermentrack is started and monitored automatically."
+  echo "Bienvenido a la intalación de Fermentrack. Este script instalará Fermentrack."
+  echo "Se creará un nuevo usuario y Fermentrack se instalará en su directorio home."
+  echo "Cuando la instalacón finalice sin errores Fermentrack se ejecuta y monitoriza automáticamente."
   echo ""
-  echo "Please note - Any existing apps that require Apache (including RaspberryPints and BrewPi-www)"
-  echo "will be deactivated. If you want support for these apps it can be optionally installed later."
-  echo "Please read http://apache.fermentrack.com/ for more information."
+  echo "Por favor tome nota - Cualquier app existente que requiera Apache (incluyendo RaspberryPints y BrewPi-www)"
+  echo "se desactivará. Si quieres soporte para esas apps puede ser instalada opcionalmente más tarde."
+  echo "Por favor lee http://apache.fermentrack.com/ para más información."
   echo ""
-  echo "For more information about Fermentrack please visit: http://fermentrack.com/"
+  echo "Para más información sobre Fermentrack, por favor visita: http://fermentrack.com/"
   echo
   if [[ ${INTERACTIVE} -eq 1 ]]; then  # Don't ask this if we're running in noninteractive mode
-      read -p "Do you want to continue to install Fermentrack? [y/N] " yn
+      read -p "¿Quieres continuar con la instalación de Fermentrack? [y/N] " yn
       case "$yn" in
-        y | Y | yes | YES| Yes ) printinfo "Ok, let's go!";;
+        y | Y | yes | YES| Yes ) printinfo "¡Ok, allá vamos!";;
         * ) exit;;
       esac
   fi
@@ -174,22 +174,22 @@ verifyRunAsRoot() {
     # verifyRunAsRoot does two things - First, it checks if the script was run by a root user. Assuming it wasn't,
     # then it attempts to relaunch itself as root.
     if [[ ${EUID} -eq 0 ]]; then
-        printinfo "This script was launched as root. Continuing installation."
+        printinfo "Este script se ejecuta como root. Continuando con la instalación."
     else
-        printinfo "This script was called without root privileges. It installs and updates several packages,"
-        printinfo "creates user accounts and updates system settings. To continue this script will now attempt"
-        printinfo "to use 'sudo' to relaunch itself as root. Please check the contents of this script for any"
-        printinfo "concerns with this requirement. Please be sure to access this script from a trusted source."
+        printinfo "Este script se ejecutó sin privilegios root. Instala y actualiza varios paquetes, crea una"
+        printinfo "cuenta de usuario y actualiza opciones del sistema. Para countinuar este script ahora comenzará"
+        printinfo "a usar 'sudo' para ejecutarse nuevamente como root. Por favor comprueba el script por cualquier"
+        printinfo "error con este requerimiento. Esegúrese de acceder a este script de una fuente fiable."
         echo
 
         if command -v sudo &> /dev/null; then
             # TODO - Make this require user confirmation before continuing
-            printinfo "This script will now attempt to relaunch using sudo."
+            printinfo "El script está listo para ejecutarse nuevamente usando sudo."
             exec sudo bash "$0" "$@"
             exit $?
         else
-            printerror "The sudo utility does not appear to be available on this system, and thus installation cannot continue."
-            printerror "Please run this script as root and it will be automatically installed."
+            printerror "La utilidad sudo no parece estar disponible en este sistema, y la instalación no puede continuar."
+            printerror "Por favor ejecuta este script como root y se instlará automáticamente."
             exit 1
         fi
     fi
@@ -200,29 +200,29 @@ verifyRunAsRoot() {
 
 # Check for network connection
 verifyInternetConnection() {
-  printinfo "Checking for Internet connection: "
+  printinfo "Chequeando la conexión a Internet: "
   ping -c 3 github.com &>> install.log
   if [ $? -ne 0 ]; then
       echo
-      printerror "Could not ping github.com. Are you sure you have a working Internet connection?"
-      printerror "Installer will exit, because it needs to fetch code from github.com"
+      printerror "No hay conexión a github.com. ¿Estás seguro de tener conexión a Internet?"
+      printerror "La instalación se cancelará porque necesita copiar código de github.com"
       exit 1
   fi
-  printinfo "Internet connection Success!"
+  printinfo "¡Conexión a Internet, CORRECTA!"
   echo
 }
 
 
 # Check if installer is up-to-date
 verifyInstallerVersion() {
-  printinfo "Checking whether this script is up to date..."
+  printinfo "Chequeando que este script esté actualizado..."
   unset CDPATH
   myPath="$( cd "$( dirname "${BASH_SOURCE[0]}")" && pwd )"
   printinfo ""$myPath"/update-tools-repo.sh start."
   bash "$myPath"/update-tools-repo.sh &>> install.log
   printinfo ""$myPath"/update-tools-repo.sh end."
   if [ $? -ne 0 ]; then
-    printerror "The update script was not up-to-date, but it should have been updated. Please re-run install.sh."
+    printerror "El script era de una versión anterior pero ya está actualizado. Ejecuta nuevamente install.sh."
     exit 1
   fi
   echo
@@ -231,19 +231,19 @@ verifyInstallerVersion() {
 
 # getAptPackages runs apt-get update, and installs the basic packages we need to continue the Fermentrack install
 getAptPackages() {
-    printinfo "Installing dependencies using apt-get"
+    printinfo "Instalando dependecias utilizando apt-get"
     lastUpdate=$(stat -c %Y /var/lib/apt/lists)
     nowTime=$(date +%s)
     if [ $(($nowTime - $lastUpdate)) -gt 604800 ] ; then
-        printinfo "Last 'apt-get update' was awhile back. Updating now. (This may take a minute)"
+        printinfo "La ultima vez que se ejecutó 'apt-get update' fue hace tiempo. Actualizando ahora. (Puede tomar un minuto)"
         apt-key update &>> install.log||die
-        printinfo "'apt-key update' ran successfully."
+        printinfo "'apt-key update' ejecutado correctamente."
         apt-get update &>> install.log||die
-        printinfo "'apt-get update' ran successfully."
+        printinfo "'apt-get update' ejecutado correctamente."
     fi
     # Installing the nginx stack along with everything we need for circus, etc.
-    printinfo "apt is updated - installing git-core, nginx, python-dev, and a handful of other packages."
-    printinfo "(This may take a few minutes during which everything will be silent) ..."
+    printinfo "apt está actualizado - instalando git-core, nginx, python-dev, y otros paqutes."
+    printinfo "Esto puede tomar unos minutos y no se verá nada nuevo en la pantalla hasta su finalización..."
 
     # For the curious:
     # git-core enables us to get the code from git (har har)
@@ -262,30 +262,30 @@ getAptPackages() {
 
     apt-get install -y bluez python-bluez python-scipy python-numpy libcap2-bin &>> install.log || die
 
-    printinfo "All packages installed successfully."
+    printinfo "Todos los paquetes se han instalado correctamente."
     echo
 }
 
 
 verifyFreeDiskSpace() {
-  printinfo "Verifying free disk space..."
+  printinfo "Verificando espacio disponible en el disco..."
   local required_free_kilobytes=512000
   local existing_free_kilobytes=$(df -Pk | grep -m1 '\/$' | awk '{print $4}')
 
   # - Unknown free disk space , not a integer
   if ! [[ "${existing_free_kilobytes}" =~ ^([0-9])+$ ]]; then
-    printerror "Unknown free disk space!"
-    printerror "We were unable to determine available free disk space on this system."
+    printerror "Espacio libre en el disco, DESCONOCIDO!"
+    printerror "No somos capaces de determinar el espacio libre disponible en el sistema."
     exit 1
   # - Insufficient free disk space
   elif [[ ${existing_free_kilobytes} -lt ${required_free_kilobytes} ]]; then
-    printerror "Insufficient Disk Space!"
-    printerror "Your system appears to be low on disk space. ${package_name} recommends a minimum of $required_free_kilobytes KB."
-    printerror "You only have ${existing_free_kilobytes} KB free."
-    printerror "If this is a new install you may need to expand your disk."
-    printerror "Try running 'sudo raspi-config', and choose the 'expand file system option'"
-    printerror "After rebooting, run this installation again."
-    printerror "Insufficient free space, exiting..."
+    printerror "Espacio en el disco, INSUFICIENTE!"
+    printerror "Tu sistema aparentemente tiene poco espacio. ${package_name} recomienda un mínimo de $required_free_kilobytes KB."
+    printerror "Sólo tienes ${existing_free_kilobytes} KB libres."
+    printerror "Si es una instalación limpia, debería expandir tu disco."
+    printerror "Prueba usando 'sudo raspi-config', y seleccioando 'expand file system option'"
+    printerror "Despues de reiniciar, ejecuta la instalación otra vez."
+    printerror "Espacio libre en el disco, insuficiente, Saliendo..."
     exit 1
   fi
   echo
@@ -296,9 +296,9 @@ verifyInstallPath() {
   if [[ ${INTERACTIVE} -eq 1 ]]; then  # Don't ask if we're in non-interactive mode
       if [ -d "$installPath" ]; then
         if [ "$(ls -A ${installPath})" ]; then
-          read -p "Install directory is NOT empty, are you SURE you want to use this path? [y/N] " yn
+          read -p "El directorio donde se instalrá no está vacio, ¿estás seguro de utilizar esta ruta? [y/N] " yn
           case "$yn" in
-              y | Y | yes | YES| Yes ) printinfo "Ok, we warned you!";;
+              y | Y | yes | YES| Yes ) printinfo "¡Ok, te lo hemos advertido!";;
               * ) exit;;
           esac
         fi
@@ -310,10 +310,10 @@ verifyInstallPath() {
 
 createConfigureUser() {
   ### Create/configure user accounts
-  printinfo "Creating and configuring user accounts."
+  printinfo "Creando y configurando la cuenta de usuario."
 
   if id -u ${fermentrackUser} >/dev/null 2>&1; then
-    printinfo "User '${fermentrackUser}' already exists, skipping..."
+    printinfo "El usuario '${fermentrackUser}' ya existe, saltando paso..."
   else
     useradd -m -G dialout ${fermentrackUser} -s /bin/bash &>> install.log ||die
     # Disable direct login for this user to prevent hijacking if password isn't changed
@@ -328,10 +328,10 @@ createConfigureUser() {
 
 
 backupOldInstallation() {
-  printinfo "Checking install directories"
+  printinfo "Chequeando el directorio de instalación"
   dirName=$(date +%F-%k:%M:%S)
   if [ "$(ls -A ${installPath})" ]; then
-    printinfo "Script install directory is NOT empty, backing up to this users home dir and then deleting contents..."
+    printinfo "El directorio de la instalación del script NO está vacio, haciendo un backup en la home del usuario y borrando contenidos..."
       if [ ! -d ~/fermentrack-backup ]; then
         mkdir -p ~/fermentrack-backup
       fi
@@ -345,7 +345,7 @@ backupOldInstallation() {
 
 
 fixPermissions() {
-  printinfo "Making sure everything is owned by ${fermentrackUser}"
+  printinfo "Asegurándonos que todo pertenece a ${fermentrackUser}"
   chown -R ${fermentrackUser}:${fermentrackUser} "$installPath"||die
   # Set sticky bit! nom nom nom
   find "$installPath" -type d -exec chmod g+rwxs {} \;||die
@@ -355,7 +355,7 @@ fixPermissions() {
 
 # Clone Fermentrack repositories
 cloneRepository() {
-  printinfo "Downloading most recent $package_name codebase..."
+  printinfo "Descargando el código de $package_name más reciente..."
   cd "$installPath"
   if [ "$github_repo" != "master" ]; then
     sudo -u ${fermentrackUser} -H git clone -b ${github_branch} ${github_repo} "$installPath/fermentrack"||die
@@ -368,7 +368,7 @@ cloneRepository() {
 
 createPythonVenv() {
   # Set up virtualenv directory
-  printinfo "Creating virtualenv directory..."
+  printinfo "Creando el directorio virtualenv..."
   cd "$installPath"
   # For specific gravity sensor support, we want --system-site-packages
   sudo -u ${fermentrackUser} -H virtualenv --system-site-packages "venv"
@@ -376,7 +376,7 @@ createPythonVenv() {
 }
 
 setPythonSetcap() {
-  printinfo "Enabling python to query bluetooth without being root"
+  printinfo "Activando python para utilizar bluetooth sin necesidad de ser root"
 
 #  if [ -a "$installPath/venv/bin/python" ]; then
 #    setcap cap_net_raw+eip "$installPath/venv/bin/python"
@@ -391,18 +391,18 @@ setPythonSetcap() {
 forcePipReinstallation() {
   # This forces reinstallation of pip within the virtualenv in case the environment has a "helpful" custom version
   # (I'm looking at you, ubuntu/raspbian...)
-  printinfo "Forcing reinstallation of pip within the virtualenv"
+  printinfo "Forzando la instalación de pip en el virtualenv"
   sudo -u ${fermentrackUser} -H bash "$myPath"/force-pip-install.sh -p "${installPath}/venv/bin/activate"
 }
 
 # Create secretsettings.py file
 makeSecretSettings() {
-  printinfo "Running make_secretsettings.sh from the script repo"
+  printinfo "Ejecutando el script make_secretsettings.sh de la repo"
   if [ -a "$installPath"/fermentrack/utils/make_secretsettings.sh ]; then
     cd "$installPath"/fermentrack/utils/
     sudo -u ${fermentrackUser} -H bash "$installPath"/fermentrack/utils/make_secretsettings.sh
   else
-    printerror "Could not find fermentrack/utils/make_secretsettings.sh!"
+    printerror "No se puede encontrar fermentrack/utils/make_secretsettings.sh!"
     # TODO: decide if this is a fatal error or not
     exit 1
   fi
@@ -412,13 +412,13 @@ makeSecretSettings() {
 
 # Run the upgrade script within Fermentrack
 runFermentrackUpgrade() {
-  printinfo "Running upgrade.sh from the script repo to finalize the install."
-  printinfo "This may take up to an hour during which everything will be silent..."
+  printinfo "Ejecutando el script upgrade.sh de la repo para finalizar la instalación."
+  printinfo "Esto puede tomar muchos minutos y no se verá nada nuevo en la pantalla hasta su finalización..."
   if [ -a "$installPath"/fermentrack/utils/upgrade.sh ]; then
     cd "$installPath"/fermentrack/utils/
     sudo -u ${fermentrackUser} -H bash "$installPath"/fermentrack/utils/upgrade.sh &>> install.log
   else
-    printerror "Could not find fermentrack/utils/upgrade.sh!"
+    printerror "No se puede encontrar fermentrack/utils/upgrade.sh!"
     exit 1
   fi
   echo
@@ -431,12 +431,12 @@ fixInsecureSSH() {
   defaultKey="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDLNC9E7YjW0Q9btd9aUoAg++/wa06LtBMc1eGPTdu29t89+4onZk1gPGzDYMagHnuBjgBFr4BsZHtng6uCRw8fIftgWrwXxB6ozhD9TM515U9piGsA6H2zlYTlNW99UXLZVUlQzw+OzALOyqeVxhi/FAJzAI9jPLGLpLITeMv8V580g1oPZskuMbnE+oIogdY2TO9e55BWYvaXcfUFQAjF+C02Oo0BFrnkmaNU8v3qBsfQmldsI60+ZaOSnZ0Hkla3b6AnclTYeSQHx5YqiLIFp0e8A1ACfy9vH0qtqq+MchCwDckWrNxzLApOrfwdF4CSMix5RKt9AF+6HOpuI8ZX root@raspberrypi"
 
   if grep -q "$defaultKey" /etc/ssh/ssh_host_rsa_key.pub; then
-    printinfo "Replacing default SSH keys. You will need to remove the previous key from known hosts on any clients that have previously connected to this rpi."
+    printinfo "Reemplazando las llaves SSH por defecto. Necesitas eliminar las llaves anteriores de los hosts y clientes que se conectaran anteriormente a la RPi."
     if rm -f /etc/ssh/ssh_host_* && dpkg-reconfigure openssh-server; then
-      printinfo "Default SSH keys replaced."
+      printinfo "Las llaves SSH fueron reemplazadas."
       echo
     else
-      printwarn "Unable to replace SSH key. You probably want to take the time to do this on your own."
+      printwarn "Imposible reemplazar las llaves SSH. Probablemente quieras tomarte un tiempo para hacer sto tu mismo."
     fi
   fi
 }
@@ -444,7 +444,7 @@ fixInsecureSSH() {
 
 # Set up nginx
 setupNginx() {
-  printinfo "Copying nginx configuration to /etc/nginx and activating."
+  printinfo "Copinado configuración de nginx a /etc/nginx y activando."
   rm -f /etc/nginx/sites-available/default-fermentrack &> /dev/null
   # Replace all instances of 'brewpiuser' with the fermentrackUser we set and save as the nginx configuration
   sed "s/brewpiuser/${fermentrackUser}/" "$myPath"/nginx-configs/default-fermentrack > /etc/nginx/sites-available/default-fermentrack
@@ -456,14 +456,14 @@ setupNginx() {
 
 setupCronCircus() {
   # Install CRON job to launch Circus
-  printinfo "Running updateCronCircus.sh from the script repo"
+  printinfo "Ejecuantado el script updateCronCircus.sh de la repo"
   if [ -f "$installPath"/fermentrack/utils/updateCronCircus.sh ]; then
     sudo -u ${fermentrackUser} -H bash "$installPath"/fermentrack/utils/updateCronCircus.sh add2cron
-    printinfo "Starting circus process monitor."
+    printinfo "Comenzando el proceso circus."
     sudo -u ${fermentrackUser} -H bash "$installPath"/fermentrack/utils/updateCronCircus.sh start
   else
     # whoops, something is wrong...
-    printerror "Could not find updateCronCircus.sh!"
+    printerror "No se puede encontrar updateCronCircus.sh!"
     exit 1
   fi
   echo
@@ -473,22 +473,22 @@ setupCronCircus() {
 installationReport() {
 #  MYIP=$(/sbin/ifconfig|egrep -A 1 'eth|wlan'|awk -F"[Bcast:]" '/inet addr/ {print $4}')
   MYIP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
-  echo "Done installing Fermentrack!"
+  echo "¡Instalación de Fermentrack finalizada!"
   echo "====================================================================================================="
-  echo "Review the log above for any errors, otherwise, your initial environment install is complete!"
+  echo "Puedes mirar el log para encontrar cualquier error, u otra cosa, pero tu intalación está completa"
   echo
-  echo "The fermentrack user has been set up with no password. Use 'sudo -u ${fermentrackUser} -i'"
-  echo "from this user to access the fermentrack user"
-  echo "To view Fermentrack, enter http://${MYIP} into your web browser"
+  echo "El usuario fermentrack se creó sin password. Usa 'sudo -u ${fermentrackUser} -i'"
+  echo "desde este usuario para acceder al usuario fermentrack"
+  echo "Para ver Fermentrack, ingresa a http://${MYIP} en tu navegador"
   echo
-  echo " - Fermentrack frontend    : http://${MYIP}"
-  echo " - Fermentrack user        : ${fermentrackUser}"
-  echo " - Installation path       : ${installPath}/fermentrack"
-  echo " - Fermentrack version     : $(git -C ${installPath}/fermentrack log --oneline -n1)"
-  echo " - Install script version  : ${scriptversion}"
-  echo " - Install tools path      : ${myPath}"
+  echo " - Frontend de Fermentrack : http://${MYIP}"
+  echo " - Usuario Fermentrack	   : ${fermentrackUser}"
+  echo " - Ruta de instalación     : ${installPath}/fermentrack"
+  echo " - Versión de Fermentrack  : $(git -C ${installPath}/fermentrack log --oneline -n1)"
+  echo " - Versión del instalador  : ${scriptversion}"
+  echo " - Herram. de instalación  : ${myPath}"
   echo ""
-  echo "Happy Brewing!"
+  echo "Happy Brewing! ;)"
   echo ""
 }
 
@@ -505,24 +505,24 @@ exec > >(tee -i install.log)
 exec 2>&1
 
 if [[ ${INTERACTIVE} -eq 1 ]]; then  # Don't ask questions if we're running in noninteractive mode
-    printinfo "To accept the default answer, just press Enter."
-    printinfo "The default is capitalized in a Yes/No question: [Y/n]"
-    printinfo "or shown between brackets for other questions: [default]"
+    printinfo "Para aceptar la respuesta por defecto, sólo presione Enter."
+    printinfo "La respuesta por defecto está en MAYÚSCULA en la pregunta Yes/No: [Y/n]"
+    printinfo "o se muestra entre corchetes para otras preguntas: [por_defecto]"
     echo
 
     date=$(date)
-    read -p "The time is currently set to $date. Is this correct? [Y/n]" choice
+    read -p "La hora está puesta como $date. ¿Es correcto? [Y/n]" choice
     case "$choice" in
       n | N | no | NO | No )
         dpkg-reconfigure tzdata;;
       * )
     esac
 
-    printinfo "All scripts associated with BrewPi & Fermentrack are now installed to a user's home directory"
-    printinfo "Hitting 'enter' will accept the default option in [brackets] (recommended)."
-    printwarn "Any data in the user's home directory may be ERASED during install!"
+    printinfo "Todos los scriptss asociados con BrewPi & Fermentrack están ahora instalados en el directorio home del usuario"
+    printinfo "Pulsando 'enter' aceptas la opción por defecto entre [corchetes] (recomendado)."
+    printwarn "¡Cualquier dato en la carpeta home del usuario se ELIMINARÁ!"
     echo
-    read -p "What user would you like to install BrewPi under? [fermentrack]: " fermentrackUser
+    read -p "¿Bajo que usuario se instalará BrewPi/Fermentrack? [fermentrack]: " fermentrackUser
     if [ -z "${fermentrackUser}" ]; then
       fermentrackUser="fermentrack"
     else
@@ -539,8 +539,8 @@ fi
 
 installPath="/home/${fermentrackUser}"
 scriptversion=$(git log --oneline -n1)
-printinfo "Configuring under user ${fermentrackUser}"
-printinfo "Configuring in directory $installPath"
+printinfo "Configurando el usuario ${fermentrackUser}"
+printinfo "Configurado en el directorio $installPath"
 echo
 
 

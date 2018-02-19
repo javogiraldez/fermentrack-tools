@@ -56,19 +56,18 @@ verifyRunAsRoot() {
 
 
     if [[ ${EUID} -eq 0 ]]; then
-        echo "::: This script was launched as root. Continuing installation."
+        echo "::: Este script es ejecutado como root. Continuando con la instalación."
     else
-        echo "::: This script was called without root privileges. It installs and updates several packages, and the"
-        echo "::: script it calls within ${tools_name} creates user accounts and updates  system settings. To"
-        echo "::: continue this script will now attempt to use 'sudo' to relaunch itself as root. Please check"
-        echo "::: the contents of this script (as well as the install script within ${tools_name} for any concerns"
-        echo "::: with this requirement. Please be sure to access this script (and ${tools_name}) from a trusted"
-        echo "::: source."
+        echo "::: Este script fue ejecutado sin privilegios root. Se instalarán y actualizarán varios paquetes, y el"
+        echo "::: script llamado dentro de ${tools_name} crea una cuenta de usuario y actualiza configuraciones del"
+        echo "::: sistema . Para continuar este script usará 'sudo' para reejecutarse como root. Por favor comprueba"
+        echo "::: el funcionamiento del script (como tambien el script de instalación ${tools_name} por cualquier"
+        echo "::: comprobación que requiera. Asegúrate de acceder a este script (and ${tools_name}) de una fuente fiable."
         echo ":::"
 
         if command -v sudo &> /dev/null; then
             # TODO - Make this require user confirmation before continuing
-            echo "::: This script will now attempt to relaunch using sudo."
+            echo "::: El script se ejecutará nuevamente utilizando sudo."
             exec curl -L $install_curl_url | sudo bash "$@"
             exit $?
         else
@@ -82,25 +81,25 @@ verifyRunAsRoot() {
 }
 
 verifyFreeDiskSpace() {
-  echo "::: Verifying free disk space..."
+  echo "::: Verificando espacio disponible en el disco..."
   local required_free_kilobytes=512000
   local existing_free_kilobytes=$(df -Pk | grep -m1 '\/$' | awk '{print $4}')
 
   # - Unknown free disk space , not a integer
   if ! [[ "${existing_free_kilobytes}" =~ ^([0-9])+$ ]]; then
-    echo ":: Unknown free disk space!"
-    echo ":: We were unable to determine available free disk space on this system."
+    echo ":: Espacio libre en el disco, DESCONOCIDO!"
+    echo ":: No somos capaces de determinar el espacio libre disponible en el sistema."
     exit 1
   # - Insufficient free disk space
   elif [[ ${existing_free_kilobytes} -lt ${required_free_kilobytes} ]]; then
-    echo ":: Insufficient Disk Space!"
-    echo ":: Your system appears to be low on disk space. ${package_name} recommends a minimum of $required_free_kilobytes KB."
-    echo ":: You only have ${existing_free_kilobytes} KB free."
-    echo ":: If this is a new install you may need to expand your disk."
-    echo ":: Try running 'sudo raspi-config', and choose the 'expand file system option'"
-    echo ":: After rebooting, run this installation again. (${install_curl_command})"
+    echo ":: Espacio en el disco, INSUFICIENTE!"
+    echo ":: Tu sistema aparentemente tiene poco espacio. ${package_name} recomienda un mínimo de $required_free_kilobytes KB."
+    echo ":: Sólo tienes ${existing_free_kilobytes} KB libres."
+    echo ":: Si es una instalación limpia, debería expandir tu disco."
+    echo ":: Prueba usando 'sudo raspi-config', y seleccioando 'expand file system option'"
+    echo ":: Despues de reiniciar, ejecuta la instalación otra vez. (${install_curl_command})"
 
-    echo "Insufficient free space, exiting..."
+    echo "Espacio libre en el disco, insuficiente, Saliendo..."
     exit 1
   fi
 }
@@ -112,50 +111,50 @@ verifyFreeDiskSpace() {
 # getAptPackages runs apt-get update, and installs the basic packages we need to continue the Fermentrack install
 # (git-core, build-essential, python-dev, python-virtualenv). The rest can be installed by fermentrack-tools/install.sh
 getAptPackages() {
-    echo -e "::: Installing dependencies using apt-get"
+    echo -e "::: Instalando dependencias utilizando apt-get"
     lastUpdate=$(stat -c %Y /var/lib/apt/lists)
     nowTime=$(date +%s)
     if [ $(($nowTime - $lastUpdate)) -gt 604800 ] ; then
-        echo "::: Last 'apt-get update' was awhile back. Updating now."
+        echo "::: La última 'apt-get update' fue hace tiempo. Actualizando ahora."
         sudo apt-get update &> /dev/null||die
-        echo ":: 'apt-get update' ran successfully."
+        echo ":: 'apt-get update' ejecutado correctamente."
     fi
 
     sudo apt-key update &> /dev/null||die
-    echo "::: 'apt-key update' ran successfully."
+    echo "::: 'apt-key update' ejecutado correctamente."
 
     # Installing the nginx stack along with everything we need for circus, etc.
-    echo "::: apt is updated - installing git-core, build-essential, python-dev, and python-virtualenv."
-    echo "::: (This may take a few minutes during which everything will be silent)"
+    echo "::: apt está actualizado - instalando git-core, build-essential, python-dev, and python-virtualenv."
+    echo "::: Esto puede tomar unos minutos y no se verá nada nuevo en la pantalla hasta su finalización..."
     sudo apt-get install -y git-core build-essential python-dev python-virtualenv &> /dev/null || die
-    echo ":: All packages installed successfully."
+    echo ":: Todos los paquetes instalados correctamente."
 }
 
 handleExistingTools() {
-  echo -e ":::: Existing instance of ${tools_name} found at ${scriptPath}/${tools_name}"
-  echo -e ":::: Moving to ${scriptPath}/${tools_name}.old/"
+  echo -e ":::: Una instancia existente de ${tools_name} se encontró en ${scriptPath}/${tools_name}"
+  echo -e ":::: Moviendo a ${scriptPath}/${tools_name}.old/"
   rm -r ${tools_name}.old &> /dev/null
   mv ${tools_name} ${tools_name}.old||die
-  echo -e ":::: Moved successfully. Reattempting clone."
+  echo -e ":::: Movido correctamente. Clonando nuevamente."
   git clone ${tools_repo_url} "${tools_name}" -q &> /dev/null||die
 }
 
 cloneFromGit() {
-    echo -e "::: Cloning ${tools_name} repo from GitHub into ${scriptPath}/${tools_name}"
+    echo -e "::: Clonando ${tools_name} repo de GitHub en ${scriptPath}/${tools_name}"
     git clone ${tools_repo_url} "${tools_name}" -q &> /dev/null||handleExistingTools
-    echo ":: Repo was cloned successfully."
+    echo ":: La repo se clonó correctamente."
 }
 launchInstall() {
-    echo "::: This script will now attempt to install ${package_name} using the 'install.sh' script that has been created at"
+    echo "::: Ahora comenzará a instalar ${package_name} usando el script 'install.sh' que fue creado en"
     echo -e "::: ${scriptPath}/${tools_name}/install.sh"
-    echo -e "::: If the install script does not complete successfully, please relaunch the script above directly."
+    echo -e "::: Si el script de instalación no se completa correctamente, por favor ejecuta otra vez el script citado."
     echo -e "::: "
-    echo -e "::: Launching ${package_name} installer."
+    echo -e "::: Ejecutando el instalador de ${package_name}."
     cd ${tools_name}
     # The -n flag makes install.sh non-interactive
     sudo bash ./install.sh -n
-    echo -e "::: Automated installation script has now finished. If installation did not complete successfully please"
-    echo -e "::: relaunch the installation script which has been downloaded at:"
+    echo -e "::: La instalación automatica ha finalizado. Si no se realizó correctamente,"
+    echo -e "::: ejecuta otra vez el script que se descargó en:"
     echo -e "::: ${scriptPath}/${tools_name}/install.sh"
 }
 
