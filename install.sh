@@ -413,7 +413,7 @@ makeSecretSettings() {
 # Run the upgrade script within Fermentrack
 runFermentrackUpgrade() {
   printinfo "Ejecutando el script upgrade.sh de la repo para finalizar la instalación."
-  printinfo "Esto puede tomar muchos minutos y no se verá nada nuevo en la pantalla hasta su finalización..."
+  printinfo "Esto puede tomar MUCHOS minutos y no se verá nada nuevo en la pantalla hasta su finalización, sé paciente..."
   if [ -a "$installPath"/fermentrack/utils/upgrade.sh ]; then
     cd "$installPath"/fermentrack/utils/
     sudo -u ${fermentrackUser} -H bash "$installPath"/fermentrack/utils/upgrade.sh &>> install.log
